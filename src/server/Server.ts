@@ -5,6 +5,7 @@ import path from 'path'; // Import the path module
 import productRoutes from "../routes/productRoutes";
 import authRoutes from '../routes/authRoutes'; 
 import cartRoutes from "../routes/cartRoutes"
+import productOffert from '../routes/productOffertRoutes'
 
 class Server {
   private app: Application;
@@ -28,6 +29,7 @@ class Server {
     this.app.use('/api', productRoutes); // Usa las rutas de productos
     this.app.use('/api', authRoutes);
     this.app.use('/api', cartRoutes);
+    this.app.use('/api',productOffert)
   }
 
   listen() {

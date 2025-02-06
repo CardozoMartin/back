@@ -7,6 +7,7 @@ export interface ICart extends Document {
   telefono: string;
   estado: 'aceptado' | 'rechazado' | 'pendiente';
   estadoPedido?: 'armando' | 'en camino' | 'entregado';
+  
 }
 
 const CartSchema = new Schema({
