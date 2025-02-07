@@ -9,7 +9,7 @@ const router = Router();
 router.get('/products-offert', productOffertController.getProducts);
 
 // Rutas protegidas con middleware de autenticación
-router.post('/products/offert', authMiddleware, upload.single('imagen'), productOffertController.createProduct);
+router.post('/products/offert', upload.single('imagen'), productOffertController.createProduct);
 router.get('/products-offert/:id', productOffertController.getProductById);
 router.put('/products/offert/:id', authMiddleware, productOffertController.updateProduct);
 router.delete('/products/offert/:id', authMiddleware, productOffertController.deleteProduct);

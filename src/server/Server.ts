@@ -3,9 +3,10 @@ import cors from 'cors';
 import path from 'path'; // Import the path module
 
 import productRoutes from "../routes/productRoutes";
-import authRoutes from '../routes/authRoutes'; 
+import authRoutes from '../routes/authRoutes';
 import cartRoutes from "../routes/cartRoutes"
 import productOffert from '../routes/productOffertRoutes'
+import bannerRoutes from "../routes/bannerRoutes"
 
 class Server {
   private app: Application;
@@ -22,14 +23,15 @@ class Server {
   middlewares() {
     this.app.use(cors()); // Habilita CORS
     this.app.use(express.json()); // Parsea el body de las solicitudes a JSON
-    this.app.use('/uploads', express.static(path.join(__dirname, '../uploads'))); 
+    this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
   }
 
   private configureRoutes(): void {
     this.app.use('/api', productRoutes); // Usa las rutas de productos
     this.app.use('/api', authRoutes);
     this.app.use('/api', cartRoutes);
-    this.app.use('/api',productOffert)
+    this.app.use('/api', productOffert)
+    this.app.use('/api', bannerRoutes)
   }
 
   listen() {
