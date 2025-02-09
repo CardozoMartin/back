@@ -4,7 +4,8 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "esbuild src/index.ts --bundle --plataform=node --outfile=dist/index.cjs --minfy",
+    "build": "esbuild src/index.ts --bundle --plataform=node --outfile=dist/index.cjs --minfy"
+,
     "start": "node --env-file=.env dist/index.cjs",
     "lint": "prettier . -w && eslint . --fix"
   },
