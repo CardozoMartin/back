@@ -8,6 +8,7 @@ export interface IUser extends Document {
   password: string;
   activo: boolean;
   codigoVerificacion: string;
+  isAdmin:boolean
 }
 
 const UserSchema: Schema = new Schema({
@@ -18,6 +19,7 @@ const UserSchema: Schema = new Schema({
   password: { type: String, required: true },
   activo: { type: Boolean, default: false }, 
   codigoVerificacion: { type: String }, 
+  isAdmin: { type: Boolean, default:false}
 });
 
 export default mongoose.model<IUser>('User', UserSchema);

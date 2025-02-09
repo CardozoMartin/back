@@ -62,7 +62,7 @@ class AuthService {
     }
 
     // Generar token JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, nombre:user.nombre, apellido:user.apellido, email:user.email, telefono:user.telefono, rol:user.isAdmin }, process.env.JWT_SECRET!, { expiresIn: '1h' });
     return token;
   }
 }

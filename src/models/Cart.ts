@@ -1,3 +1,4 @@
+import { required } from 'joi';
 import { Schema, model, Document } from 'mongoose';
 
 export interface ICart extends Document {
@@ -7,6 +8,7 @@ export interface ICart extends Document {
   telefono: string;
   estado: 'aceptado' | 'rechazado' | 'pendiente';
   estadoPedido?: 'armando' | 'en camino' | 'entregado';
+  idUser?: string;
   
 }
 
@@ -19,7 +21,8 @@ const CartSchema = new Schema({
   email: { type: String, required: true },
   telefono: { type: String, required: true },
   estado: { type: String, enum: ['aceptado', 'rechazado', 'pendiente'], default: 'pendiente' },
-  estadoPedido: { type: String, enum: ['armando', 'en camino', 'entregado'] }
+  estadoPedido: { type: String, enum: ['armando', 'en camino', 'entregado'] },
+  idUser:{type: String, },
 }, { timestamps: true });
 
 export default model<ICart>('Cart', CartSchema);
