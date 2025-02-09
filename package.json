@@ -4,8 +4,7 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "esbuild src/index.ts --bundle --plataform=node --outfile=dist/index.cjs --minfy"
-,
+    "build": "chmod +x ./node_modules/.bin/esbuild && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --minify",
     "start": "node --env-file=.env dist/index.cjs",
     "lint": "prettier . -w && eslint . --fix"
   },
@@ -15,7 +14,6 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "build": "^0.1.4",
     "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -36,7 +34,7 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.0",
     "@types/nodemailer": "^6.4.17",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.19.5",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
