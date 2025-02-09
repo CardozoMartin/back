@@ -6,10 +6,10 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 const router = Router();
 
 // Protege las rutas de productos con el middleware de autenticación
-router.post('/products',authMiddleware, upload.single('imagen'), productController.createProduct);
+router.post('/products', upload.single('imagen'), productController.createProduct);
 router.get('/products', productController.getProducts);
-router.get('/products/:id', authMiddleware, productController.getProductById);
-router.put('/products/:id',authMiddleware,  productController.updateProduct);
+router.get('/products/:id', productController.getProductById);
+router.put('/products/:id',  productController.updateProduct);
 router.delete('/products/:id',authMiddleware, productController.deleteProduct);
 
 export default router;
