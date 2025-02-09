@@ -8,7 +8,7 @@
   "start": "node dist/index.cjs",
   "lint": "prettier . -w && eslint . --fix"
 }
-
+,
   "keywords": [],
   "author": "",
   "license": "ISC",
