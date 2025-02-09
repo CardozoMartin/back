@@ -5,7 +5,7 @@
  "scripts": {
   "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
   "build": "chmod +x ./node_modules/.bin/esbuild && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --minify",
-  "start": "node dist/index.cjs",
+  "start": "npm run build && node dist/index.cjs",
   "lint": "prettier . -w && eslint . --fix"
 }
 ,
