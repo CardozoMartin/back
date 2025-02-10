@@ -21,15 +21,27 @@ class Server {
   }
 
   middlewares() {
+    const allowedOrigins = [
+      "http://localhost:5173", 
+      "https://bahiaacc.netlify.app"
+    ];
+  
     this.app.use(cors({
-      origin: "http://localhost:5173", // Permite solo este dominio
-      methods: "GET,POST,PUT,DELETE", // Métodos HTTP permitidos
-      allowedHeaders: "Content-Type,Authorization" // Headers permitidos
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("No autorizado por CORS"));
+        }
+      },
+      methods: "GET,POST,PUT,DELETE",
+      allowedHeaders: "Content-Type,Authorization"
     }));
   
     this.app.use(express.json()); // Parsea el body de las solicitudes a JSON
     this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
   }
+  
   
 
   private configureRoutes(): void {
