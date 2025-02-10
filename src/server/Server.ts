@@ -21,10 +21,16 @@ class Server {
   }
 
   middlewares() {
-    this.app.use(cors()); // Habilita CORS
+    this.app.use(cors({
+      origin: "https://bahiaacc.netlify.app", // Permite solo este dominio
+      methods: "GET,POST,PUT,DELETE", // Métodos HTTP permitidos
+      allowedHeaders: "Content-Type,Authorization" // Headers permitidos
+    }));
+  
     this.app.use(express.json()); // Parsea el body de las solicitudes a JSON
     this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
   }
+  
 
   private configureRoutes(): void {
     this.app.use('/api', productRoutes); // Usa las rutas de productos
