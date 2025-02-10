@@ -22,7 +22,7 @@ class Server {
 
   middlewares() {
     this.app.use(cors({
-      origin: "https://bahiaacc.netlify.app", // Permite solo este dominio
+      origin: "http://localhost:5173", // Permite solo este dominio
       methods: "GET,POST,PUT,DELETE", // Métodos HTTP permitidos
       allowedHeaders: "Content-Type,Authorization" // Headers permitidos
     }));
