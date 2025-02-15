@@ -111,7 +111,6 @@ class MercadoPagoService {
       const payment = await mercadopago.payment.get(paymentId);
       return payment.response.status;
     } catch (error) {
-      console.error('Error al obtener estado del pago:', error);
       throw error;
     }
   }
@@ -121,21 +120,17 @@ class MercadoPagoService {
       const payment = await mercadopago.payment.get(paymentId);
       return payment.response;
     } catch (error) {
-      console.error('Error al obtener información del pago:', error);
       throw error;
     }
   }
 
   async handlePaymentUpdate(paymentId: string) {
     try {
-      console.log('📌 Procesando actualización de pago:', paymentId);
-
       // Obtener información del pago
       const paymentInfo = await this.getPaymentInfo(paymentId);
       const cartId = paymentInfo.external_reference;
       const status = paymentInfo.status;
 
-      console.log('📌 Estado del pago:', status);
       console.log('📌 ID del carrito:', cartId);
 
       // Buscar el carrito
@@ -151,33 +146,46 @@ class MercadoPagoService {
       if (status === 'approved') estadoPago = 'pagado';
       if (status === 'rejected') estadoPago = 'fallido';
 
-      // Si el pago fue aprobado, primero cambiamos el estado del carrito
+      // Si el pago fue aprobado:
+      // 1. Actualizar estado del carrito a 'aceptado'
+      // 2. Actualizar estado del pago
+      // 3. Enviar email de confirmación
       if (status === 'approved') {
-        console.log('📌 Actualizando estado del carrito a aceptado');
         try {
+          // Cambiar estado del carrito a 'aceptado'
           await CartService.changeCartStatus(cartId, 'aceptado');
-          console.log('📌 Estado del carrito actualizado exitosamente');
+          console.log('📌 Estado del carrito actualizado a aceptado');
+          
+          // Actualizar estado del pago
+          await CartService.updateCart(cartId, {
+            estadoPago,
+            paymentId,
+            estado: 'aceptado'  // Aseguramos que el estado del carrito también se actualice
+          });
+          
+          // Enviar email de confirmación
+          await emailService.sendOrderAcceptedEmail(cart);
+          console.log('📌 Email de confirmación enviado');
         } catch (error) {
-          console.error('❌ Error al cambiar estado del carrito:', error);
+          console.error('❌ Error en el proceso de actualización:', error);
           throw error;
         }
+      } else {
+        // Si el pago no fue aprobado, solo actualizamos el estado del pago
+        await CartService.updateCart(cartId, {
+          estadoPago,
+          paymentId
+        });
       }
-
-      // Luego actualizamos el estado del pago
-      await CartService.updateCart(cartId, {
-        estadoPago,
-        paymentId
-      });
 
       console.log('📌 Estado de pago actualizado:', estadoPago);
 
-      // Si el pago fue aprobado, enviamos el email
-      if (status === 'approved') {
-        await emailService.sendOrderAcceptedEmail(cart);
-        console.log('📌 Email de confirmación enviado');
-      }
-
-      return { success: true, status, cartId };
+      return { 
+        success: true, 
+        status, 
+        cartId,
+        cartStatus: status === 'approved' ? 'aceptado' : cart.estado 
+      };
     } catch (error) {
       console.error('❌ Error al procesar actualización de pago:', error);
       throw error;
