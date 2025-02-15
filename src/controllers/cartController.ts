@@ -55,13 +55,18 @@ class CartController {
 
         if (cart) {
           let estadoPago = 'pendiente';
-          if (status === 'approved') estadoPago = 'pagado';
+          let estado = 'pendiente';
+          if (status === 'approved'){
+            estadoPago = 'pagado';
+            estado='aceptado';
+          } 
           if (status === 'rejected') estadoPago = 'fallido';
 
           // Actualizar el carrito con el estado del pago y el ID del pago
           await cartService.updateCart(cart._id, { 
             estadoPago, 
-            paymentId 
+            paymentId,
+            estado
           });
           console.log('📌 Carrito actualizado con nuevo estado:', estadoPago);
 
