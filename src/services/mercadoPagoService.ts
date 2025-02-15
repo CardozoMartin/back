@@ -124,7 +124,7 @@ class MercadoPagoService {
     }
   }
 
-  async handlePaymentUpdate(paymentId: string) {
+ async handlePaymentUpdate(paymentId: string) {
     try {
       // Obtener información del pago
       const paymentInfo = await this.getPaymentInfo(paymentId);
