@@ -4,6 +4,7 @@ import cartController from '../controllers/cartController';
 const router = express.Router();
 
 router.post('/carts', cartController.createCart);
+router.post('/webhook', cartController.handlePaymentWebhook);
 router.get('/carts', cartController.getCarts);
 router.get('/carts/:id', cartController.getCartById);
 router.put('/carts/:id', cartController.updateCart);

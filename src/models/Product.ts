@@ -1,3 +1,4 @@
+import { required } from 'joi';
 import { Schema, Document, model } from 'mongoose';
 
 export interface IProduct extends Document {
@@ -7,6 +8,7 @@ export interface IProduct extends Document {
   material: string;
   color: string;
   stock: number;
+  categoria:String;
   imagen?: string;
 }
 
@@ -17,6 +19,7 @@ const ProductSchema: Schema = new Schema({
   material: { type: String, required: true },
   color: { type: String, required: true },
   stock: { type: Number, required: true, default: 0 },
+  categoria:{type:String, required:true},
   imagen: { type: String } // URL de la imagen en Cloudinary
 });
 

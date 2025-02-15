@@ -1,21 +1,82 @@
 import { Request, Response } from 'express';
 import cartService from '../services/cartService';
 import emailService from '../services/emailService'; // Importa el servicio de correo
+import mercadoPagoService from '../services/mercadoPagoService';
 
 class CartController {
   // Crear un nuevo carrito
   async createCart(req: Request, res: Response) {
     try {
       const cartData = req.body;
-      const cart = await cartService.createCart(cartData);
-
-      // Enviar correo de creación de pedido
-      await emailService.sendOrderCreatedEmail(cart);
-
-      res.status(201).json(cart);
-    } catch (error) {
+      console.log(cartData)
+      
+      // Crear el carrito y el pago en MercadoPago
+      const paymentResult = await mercadoPagoService.createPayment(cartData);
+      
+      if (!paymentResult || !paymentResult.paymentUrl) {
+        return res.status(400).json({
+          error: 'No se pudo crear el link de pago'
+        });
+      }
+  
+      return res.status(200).json({
+        paymentUrl: paymentResult.paymentUrl,
+        cartId: paymentResult.cartId
+      });
+    } catch (error: any) {
       console.error('Error al crear el carrito:', error);
-      res.status(500).json({ message: 'Error al crear el carrito' });
+      return res.status(500).json({
+        error: 'Error al crear el carrito',
+        details: error.message
+      });
+    }
+  }
+
+  async handlePaymentWebhook(req: Request, res: Response) {
+    try {
+      console.log('📌 Webhook recibido:', req.body);
+
+      // Verificar que sea una notificación de pago
+      if (req.body.action === "payment.created" || req.body.action === "payment.updated") {
+        const paymentId = req.body.data.id;
+        console.log('📌 Payment ID recibido:', paymentId);
+
+        // Obtener el estado del pago
+        const status = await mercadoPagoService.getPaymentStatus(paymentId);
+        console.log('📌 Estado del pago obtenido:', status);
+
+        // Obtener información completa del pago para conseguir la external_reference
+        const paymentInfo = await mercadoPagoService.getPaymentInfo(paymentId);
+        const cartId = paymentInfo.external_reference;
+        
+        // Buscar el carrito por su ID
+        const cart = await cartService.getCartById(cartId);
+        console.log('📌 Carrito encontrado:', cart);
+
+        if (cart) {
+          let estadoPago = 'pendiente';
+          if (status === 'approved') estadoPago = 'pagado';
+          if (status === 'rejected') estadoPago = 'fallido';
+
+          // Actualizar el carrito con el estado del pago y el ID del pago
+          await cartService.updateCart(cart._id, { 
+            estadoPago, 
+            paymentId 
+          });
+          console.log('📌 Carrito actualizado con nuevo estado:', estadoPago);
+
+          // Si el pago fue aprobado, actualizar el estado del carrito
+          if (status === 'approved') {
+            await cartService.changeCartStatus(cart._id, 'aceptado');
+            await emailService.sendOrderAcceptedEmail(cart);
+          }
+        }
+      }
+
+      res.status(200).send();
+    } catch (error) {
+      console.error('❌ Error al procesar webhook:', error);
+      res.status(500).json({ message: 'Error al procesar notificación de pago' });
     }
   }
 

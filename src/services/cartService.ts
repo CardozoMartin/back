@@ -93,6 +93,10 @@ class CartService {
   async changeOrderStatus(id: string, estadoPedido: 'armando' | 'en camino' | 'entregado'): Promise<ICart | null> {
     return await Cart.findByIdAndUpdate(id, { estadoPedido }, { new: true }).populate('productos.productoId');
   }
+  async getCartByPaymentId(paymentId: string): Promise<ICart | null> {
+    return await Cart.findOne({ paymentId }).populate('productos.productoId');
+  }
+
 }
 
 export default new CartService();

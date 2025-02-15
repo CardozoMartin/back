@@ -2,13 +2,12 @@
   "name": "back",
   "version": "1.0.0",
   "main": "src/index.ts",
-"scripts": {
+  "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "chmod +x ./node_modules/.bin/esbuild && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs --minify",
     "start": "node dist/index.cjs",
     "lint": "prettier . -w && eslint . --fix"
-  }
-,
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,6 +20,7 @@
     "express": "^4.21.2",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "mercadopago": "^1.5.17",
     "mongoose": "^8.9.6",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
@@ -32,6 +32,7 @@
     "@types/express": "^5.0.0",
     "@types/joi": "^17.2.2",
     "@types/jsonwebtoken": "^9.0.8",
+    "@types/mercadopago": "^1.5.11",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.0",
     "@types/nodemailer": "^6.4.17",
