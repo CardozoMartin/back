@@ -151,7 +151,19 @@ class MercadoPagoService {
       if (status === 'approved') estadoPago = 'pagado';
       if (status === 'rejected') estadoPago = 'fallido';
 
-      // Actualizar el carrito
+      // Si el pago fue aprobado, primero cambiamos el estado del carrito
+      if (status === 'approved') {
+        console.log('📌 Actualizando estado del carrito a aceptado');
+        try {
+          await CartService.changeCartStatus(cartId, 'aceptado');
+          console.log('📌 Estado del carrito actualizado exitosamente');
+        } catch (error) {
+          console.error('❌ Error al cambiar estado del carrito:', error);
+          throw error;
+        }
+      }
+
+      // Luego actualizamos el estado del pago
       await CartService.updateCart(cartId, {
         estadoPago,
         paymentId
@@ -159,11 +171,10 @@ class MercadoPagoService {
 
       console.log('📌 Estado de pago actualizado:', estadoPago);
 
-      // Si el pago fue aprobado
+      // Si el pago fue aprobado, enviamos el email
       if (status === 'approved') {
-        await CartService.changeCartStatus(cartId, 'aceptado');
         await emailService.sendOrderAcceptedEmail(cart);
-        console.log('📌 Carrito marcado como aceptado y email enviado');
+        console.log('📌 Email de confirmación enviado');
       }
 
       return { success: true, status, cartId };
