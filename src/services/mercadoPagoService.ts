@@ -11,7 +11,7 @@ class MercadoPagoService {
     }
 
     mercadopago.configure({
-      access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN || 'APP_USR-1862830506680323-021518-3205302ed15403a2bacbe0c756ac2e31-2270163820',
+      access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN,
     });
   }
 
