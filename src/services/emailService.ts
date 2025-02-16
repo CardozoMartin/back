@@ -157,6 +157,55 @@ class EmailService {
 
         await transporter.sendMail(mailOptions);
     }
+    async sendPaymentReceivedEmail(cart: ICart) {
+        const content = `
+            <p style="font-size: 16px; line-height: 1.5; color: #333;">
+                ¡Hemos recibido tu pago exitosamente! 🎉
+                <br><br>
+                Tu pedido está siendo procesado y te mantendremos informado sobre su progreso.
+                <br><br>
+                Gracias por confiar en Bahía ACC. ¡Esperamos que disfrutes de tus productos!
+            </p>
+        `;
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: cart.email,
+            subject: '¡Pago Recibido! - Bahía ACC',
+            html: this.getEmailTemplate('¡Pago Recibido!', content, cart)
+        };
+
+        await transporter.sendMail(mailOptions);
+    }
+
+    // Enviar correo cuando el pedido está pendiente de pago por transferencia
+    async sendPendingPaymentEmail(cart: ICart, bankDetails: { bankName: string, accountNumber: string, accountHolder: string }) {
+        const content = `
+            <p style="font-size: 16px; line-height: 1.5; color: #333;">
+                Gracias por realizar tu pedido con Bahía ACC. 🎉
+                <br><br>
+                Tu pedido está pendiente de pago por transferencia bancaria. A continuación, te proporcionamos los datos para realizar la transferencia:
+                <br><br>
+                <strong>🏦 Banco:</strong> ${bankDetails.bankName}<br>
+                <strong>🔢 Número de Cuenta:</strong> ${bankDetails.accountNumber}<br>
+                <strong>👤 Titular de la Cuenta:</strong> ${bankDetails.accountHolder}
+                <br><br>
+                Una vez realizado el pago, por favor envíanos el comprobante de transferencia a este correo o a nuestro WhatsApp para procesar tu pedido.
+                <br><br>
+                Si tienes alguna duda, no dudes en contactarnos.
+            </p>
+        `;
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: cart.email,
+            subject: 'Pedido Pendiente de Pago - Bahía ACC',
+            html: this.getEmailTemplate('Pedido Pendiente de Pago', content, cart)
+        };
+
+        await transporter.sendMail(mailOptions);
+    }
+
 }
 
 export default new EmailService();

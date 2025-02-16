@@ -8,21 +8,52 @@ class CartController {
   async createCart(req: Request, res: Response) {
     try {
       const cartData = req.body;
-      console.log(cartData)
       
-      // Crear el carrito y el pago en MercadoPago
-      const paymentResult = await mercadoPagoService.createPayment(cartData);
-      
-      if (!paymentResult || !paymentResult.paymentUrl) {
+      // Verificar el modo de pago
+      if (cartData.modoPago === 'transferencia') {
+        // Datos bancarios (estos deberían venir de una configuración o variable de entorno)
+        const bankDetails = {
+          bankName: "Banco XYZ",
+          accountNumber: "1234567890",
+          accountHolder: "Bahía ACC"
+        };
+        
+        // Crear el carrito con estado pendiente
+        const cart = await cartService.createCart({
+          ...cartData,
+          estadoPago: 'pendiente',
+          estado: 'pendiente'
+        });
+        
+        // Enviar email con los datos de la transferencia
+        await emailService.sendPendingPaymentEmail(cart, bankDetails);
+        
+        return res.status(200).json({
+          message: 'Carrito creado exitosamente',
+          cartId: cart._id
+        });
+        
+      } else if (cartData.modoPago === 'mercado_pago') {
+        // Crear el carrito y el pago en MercadoPago
+        const paymentResult = await mercadoPagoService.createPayment(cartData);
+        await emailService.sendOrderCreatedEmail(cartData);
+        
+        if (!paymentResult || !paymentResult.paymentUrl) {
+          return res.status(400).json({
+            error: 'No se pudo crear el link de pago'
+          });
+        }
+    
+        return res.status(200).json({
+          paymentUrl: paymentResult.paymentUrl,
+          cartId: paymentResult.cartId
+        });
+      } else {
         return res.status(400).json({
-          error: 'No se pudo crear el link de pago'
+          error: 'Modo de pago no válido'
         });
       }
-  
-      return res.status(200).json({
-        paymentUrl: paymentResult.paymentUrl,
-        cartId: paymentResult.cartId
-      });
+
     } catch (error: any) {
       console.error('Error al crear el carrito:', error);
       return res.status(500).json({
@@ -61,14 +92,15 @@ class CartController {
             estado='aceptado';
           } 
           if (status === 'rejected') estadoPago = 'fallido';
-
+          
           // Actualizar el carrito con el estado del pago y el ID del pago
           await cartService.updateCart(cart._id, { 
             estadoPago, 
             paymentId,
             estado
           });
-          console.log('📌 Carrito actualizado con nuevo estado:', estadoPago);
+          await emailService.sendPaymentReceivedEmail(cart);
+          await emailService.sendOrderAcceptedEmail(cart)
 
           // Si el pago fue aprobado, actualizar el estado del carrito
           if (status === 'approved') {
@@ -164,6 +196,9 @@ class CartController {
 
       if (cart) {
         // Enviar correo si el estado del pedido es "entregado"
+        if(estadoPedido === "en camino"){
+          await emailService.sendOrderInTransitEmail(cart)
+        }
         if (estadoPedido === 'entregado') {
           await emailService.sendOrderDeliveredEmail(cart);
         }
