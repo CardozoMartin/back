@@ -81,7 +81,7 @@ class MercadoPagoService {
       };
 
       const result = await mercadopago.preferences.create(preference);
-      console.log('Respuesta MP:', result);
+    
 
       if (!result?.body?.init_point) {
         await Cart.findByIdAndDelete(savedCart._id);
@@ -124,7 +124,7 @@ class MercadoPagoService {
     }
   }
 
- async handlePaymentUpdate(paymentId: string) {
+  async handlePaymentUpdate(paymentId: string) {
     try {
       // Obtener información del pago
       const paymentInfo = await this.getPaymentInfo(paymentId);
@@ -132,6 +132,7 @@ class MercadoPagoService {
       const status = paymentInfo.status;
 
       console.log('📌 ID del carrito:', cartId);
+      console.log('📌 Estado del pago:', status);
 
       // Buscar el carrito
       const cart = await Cart.findById(cartId);
@@ -147,27 +148,37 @@ class MercadoPagoService {
       if (status === 'rejected') estadoPago = 'fallido';
 
       // Si el pago fue aprobado:
-      // 1. Actualizar estado del carrito a 'aceptado'
-      // 2. Actualizar estado del pago
-      // 3. Enviar email de confirmación
       if (status === 'approved') {
         try {
-          // Cambiar estado del carrito a 'aceptado'
-          await CartService.changeCartStatus(cartId, 'aceptado');
-          console.log('📌 Estado del carrito actualizado a aceptado');
+          console.log('📌 Iniciando proceso de actualización de stock');
           
-          // Actualizar estado del pago
+          // Primero actualizamos el stock usando el servicio existente
+          const updatedCart = await CartService.changeCartStatus(cartId, 'aceptado');
+          if (!updatedCart) {
+            throw new Error('Error al actualizar el stock');
+          }
+          console.log('📌 Stock actualizado correctamente');
+
+          // Luego actualizamos el estado del pago
           await CartService.updateCart(cartId, {
             estadoPago,
             paymentId,
-            estado: 'aceptado'  // Aseguramos que el estado del carrito también se actualice
+            estado: 'aceptado'
           });
-          
+          console.log('📌 Estado del pago actualizado');
+
           // Enviar email de confirmación
           await emailService.sendOrderAcceptedEmail(cart);
           console.log('📌 Email de confirmación enviado');
+
         } catch (error) {
           console.error('❌ Error en el proceso de actualización:', error);
+          // Si hay un error en la actualización del stock, aún así actualizamos el estado del pago
+          await CartService.updateCart(cartId, {
+            estadoPago,
+            paymentId,
+            estado: 'aceptado'
+          });
           throw error;
         }
       } else {
@@ -178,7 +189,7 @@ class MercadoPagoService {
         });
       }
 
-      console.log('📌 Estado de pago actualizado:', estadoPago);
+      console.log('📌 Proceso completado. Estado de pago:', estadoPago);
 
       return { 
         success: true, 

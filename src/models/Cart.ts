@@ -12,6 +12,8 @@ export interface ICart extends Document {
   estado: 'aceptado' | 'rechazado' | 'pendiente';
   estadoPedido?: 'armando' | 'en camino' | 'entregado';
   idUser?: string;
+  createdAt: Date;
+  expiresAt: Date;
 
 }
 
@@ -39,7 +41,15 @@ const CartSchema = new Schema({
   },
   paymentUrl: {
     type: String
-  }
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  },
+  expiresAt: {
+    type: Date,
+    default: () => new Date(Date.now() + 3 * 60 * 1000) // 3 minutos en milisegundos
+}
 }, { timestamps: true });
 
 export default model<ICart>('Cart', CartSchema);

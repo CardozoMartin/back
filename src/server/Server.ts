@@ -1,7 +1,8 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import path from 'path'; // Import the path module
-
+import cron from 'node-cron';
+import cartService from '../services/cartService';
 import productRoutes from "../routes/productRoutes";
 import authRoutes from '../routes/authRoutes';
 import cartRoutes from "../routes/cartRoutes"
@@ -18,6 +19,7 @@ class Server {
 
     this.middlewares();
     this.configureRoutes();
+    this.setupCleanupJob();
   }
 
   middlewares() {
@@ -25,7 +27,18 @@ class Server {
     this.app.use(express.json()); // Parsea el body de las solicitudes a JSON
     this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
   }
-
+  private setupCleanupJob(): void {
+    // Ejecutar cada 5 minutos
+    cron.schedule('*/5 * * * *', async () => {
+      console.log('Iniciando limpieza de carritos expirados...');
+      try {
+        await cartService.cleanExpiredCarts();
+        console.log('Limpieza de carritos completada');
+      } catch (error) {
+        console.error('Error en la limpieza de carritos:', error);
+      }
+    });
+  }
   private configureRoutes(): void {
     this.app.use('/api', productRoutes); // Usa las rutas de productos
     this.app.use('/api', authRoutes);

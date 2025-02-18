@@ -19,7 +19,7 @@ const ProductSchema: Schema = new Schema({
   material: { type: String, required: true },
   color: { type: String, required: true },
   stock: { type: Number, required: true, default: 0 },
-  categoria:{type:String, required:true},
+  categoria: { type: String, required: false },
   imagen: { type: String } // URL de la imagen en Cloudinary
 });
 
